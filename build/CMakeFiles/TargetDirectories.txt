@@ -1,0 +1,4 @@
+C:/Users/artem/hwinfo_CS50/build/CMakeFiles/edit_cache.dir
+C:/Users/artem/hwinfo_CS50/build/CMakeFiles/rebuild_cache.dir
+C:/Users/artem/hwinfo_CS50/build/src/CMakeFiles/edit_cache.dir
+C:/Users/artem/hwinfo_CS50/build/src/CMakeFiles/rebuild_cache.dir
