@@ -1,4 +1,3 @@
-C:/Users/artem/hwinfo_CS50/build/CMakeFiles/edit_cache.dir
-C:/Users/artem/hwinfo_CS50/build/CMakeFiles/rebuild_cache.dir
-C:/Users/artem/hwinfo_CS50/build/src/CMakeFiles/edit_cache.dir
-C:/Users/artem/hwinfo_CS50/build/src/CMakeFiles/rebuild_cache.dir
+C:/Users/artem/hwinfo_CS50/build/CMakeFiles/test.dir
+C:/Users/artem/hwinfo_CS50/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/artem/hwinfo_CS50/build/CMakeFiles/ZERO_CHECK.dir
