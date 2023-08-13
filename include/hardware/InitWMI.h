@@ -12,6 +12,9 @@ using namespace std;
 
 namespace hardware
 {
+    namespace WMI 
+    {
+
     template <typename T>
     std::vector<std::string> WMIExec(const string& table, string field, vector<T>& var,
                 const string& server = "root/cimv2")
@@ -180,13 +183,6 @@ namespace hardware
             pclsObj = NULL;
         }
 
-        ret.reserve(var.size());
-        for (auto& v : var) {
-            if (v == nullptr) 
-                continue;
-                std::wstring tmp(v);
-                ret.emplace_back(tmp.begin(), tmp.end());
-            }
 
 
         // Cleanup
@@ -201,14 +197,34 @@ namespace hardware
         return ret;   // Program successfully completed.
     }
 
-    std::vector<std::string> GetWin32(const string& table, string field)
+    string GetWin32_s(const string& table, string field)
     {
-        std::vector<const wchar_t*> vendors{};
+        std::vector<const wchar_t*> var{};
         std::vector<std::string> ret;
-        ret.reserve(vendors.size());
-        ret = WMIExec(table, field, vendors);
+        WMIExec(table, field, var);
+        ret.reserve(var.size());
+        for (auto& v : var) 
+        {
+            if (v == nullptr) 
+                continue;
+            std::wstring tmp(v);
+            ret.emplace_back(tmp.begin(), tmp.end());
+        }
+        return ret[0];
 
-        return ret;
+    }
+
+    int64_t GetWin32_d(const string& table, string field)
+    {
+        std::vector<int64_t> var{};
+        WMIExec(table, field, var);
+        std::vector<int64_t> ret;
+        ret.reserve(var.size());
+        for (auto& v : var)
+            ret.push_back(v);
+        return ret[0];
+    }
+    
 
     }
 }
