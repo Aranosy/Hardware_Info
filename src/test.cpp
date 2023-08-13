@@ -1,23 +1,26 @@
-#include <hardware/InitWMI.h>
+#include <InitWMI.h>
+#include <cpu.h>
+#include <windows.h>
+#include <fcntl.h>
+#include <io.h>
+#include <stdio.h>
+
+using namespace hardware::WMI;
 
 int main(void)
 {
-    std::vector<const wchar_t*> vendors{};
-    hardware::WMIExec("Win32_Processor", "Name", vendors);
-    std::vector<std::string> ret;
-    ret.reserve(vendors.size());
-    for (auto& v : vendors) {
-        if (v == nullptr) {
-        continue;
-        }
-        std::wstring tmp(v);
-        ret.emplace_back(tmp.begin(), tmp.end());
-    }
-
-    for(auto i: ret)
-    {
-        cout << i;
-    }
-
-  return 0;
+    hardware::CPU check;
+    // Set CP1251 instead of default CP866 to output Cyrillic text.    
+    cout << "------------------- CPU -----------------------\n";
+    cout << "CPU model: " << check.model << "\n";
+    cout << "CPU vendor: " << check.vendor << "\n";
+    cout << "CPU nPhysicalCores: " << check.nPhysicalCores << "\n";
+    cout << "CPU nLogicalCores: " << check.nLogicalCores << "\n";
+    cout << "CPU currentClockSpeed: " << check.currentClockSpeed << "\n";
+    cout << "CPU maxClockSpeed: " << check.maxClockSpeed << "\n";
+    cout << "CPU cacheSize: " << check.cacheSize << "\n";
+    cout << "-----------------------------------------------\n";
+    cout << "Press Enter to end program...";
+    std::cin.ignore();
+    return 0;
 }
