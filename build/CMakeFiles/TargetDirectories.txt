@@ -1,3 +1,0 @@
-C:/Users/artem/hwinfo_CS50/build/CMakeFiles/test.dir
-C:/Users/artem/hwinfo_CS50/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/artem/hwinfo_CS50/build/CMakeFiles/ZERO_CHECK.dir
