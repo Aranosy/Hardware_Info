@@ -196,35 +196,50 @@ namespace hardware
 
         return ret;   // Program successfully completed.
     }
-
-    string GetWin32_s(const string& table, string field)
-    {
-        std::vector<const wchar_t*> var{};
-        std::vector<std::string> ret;
-        WMIExec(table, field, var);
-        ret.reserve(var.size());
-        for (auto& v : var) 
-        {
-            if (v == nullptr) 
-                continue;
-            std::wstring tmp(v);
-            ret.emplace_back(tmp.begin(), tmp.end());
-        }
-        return ret[0];
-
-    }
-
-    int64_t GetWin32_d(const string& table, string field)
-    {
-        std::vector<int64_t> var{};
-        WMIExec(table, field, var);
-        std::vector<int64_t> ret;
-        ret.reserve(var.size());
-        for (auto& v : var)
-            ret.push_back(v);
-        return ret[0];
-    }
     
+    template <typename T>
+    T GetWin32(const string& table, string field)
+    {
+        if constexpr (is_same<T, string>::value || is_same<T, vector<string>>::value)
+        {
+            std::vector<const wchar_t*> var{};
+            std::vector<std::string> ret;
+            WMIExec(table, field, var);
+            ret.reserve(var.size());
+            for (auto& v : var) 
+            {
+                if (v == nullptr) 
+                    continue;
+                std::wstring tmp(v);
+                ret.emplace_back(tmp.begin(), tmp.end());
+            }
+
+            if constexpr (is_same<T, string>::value)
+                return ret[0];
+            else
+                return ret;
+        }
+        else if constexpr (is_same<T, int64_t>::value || is_same<T, vector<int64_t>>::value)
+        {
+            std::vector<int64_t> var{};
+            WMIExec(table, field, var);
+            std::vector<int64_t> ret;
+            ret.reserve(var.size());
+            for (auto& v : var)
+                ret.push_back(v);
+
+            if constexpr (is_same<T, int64_t>::value)
+                return ret[0];
+            else
+                return ret;
+
+        }
+
+        
+
+    }
+
+
 
     }
 }
