@@ -232,14 +232,8 @@ namespace hardware
                 return ret[0];
             else
                 return ret;
-
         }
-
-        
-
     }
-
-
 
     }
 }
