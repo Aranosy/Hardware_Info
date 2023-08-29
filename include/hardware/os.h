@@ -9,7 +9,6 @@ namespace hardware
     public:
 
     string architecture = WMI::GetWin32<string>("Win32_OperatingSystem", "OSArchitecture");
-    int64_t language = WMI::GetWin32<int64_t>("Win32_OperatingSystem", "OSLanguage");
     string serialN = WMI::GetWin32<string>("Win32_OperatingSystem", "SerialNumber");
     string getName()
     {

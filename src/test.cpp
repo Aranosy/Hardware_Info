@@ -28,6 +28,7 @@ int main(void)
     cout << "GPU vendor: " << gpu.vendor[0] << "\n";
     cout << "GPU memoryAmount: " << gpu.memoryAmount[0] << "\n";
     cout << "GPU memoryType: " << gpu.memoryType[0] << "\n";
+    cout << "GPU driverVersion: " << gpu.driverVersion[0] << "\n";
     cout << "-----------------------------------------------\n\n";
 
     hardware::OS os;
