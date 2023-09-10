@@ -44,7 +44,9 @@ int main(void)
     cout << "Drive model: " << drive.model[0] << "\n";
     cout << "Drive vendor: " << drive.vendor[0] << "\n";
     cout << "Drive serial number: " << drive.serialN[0] << "\n";
-    cout << "Drive size: " <<   drive.size[0] << "\n";
+    cout << "Drive size: " <<   drive.size[0] << " Gb" << "\n";
+    cout << "Drive free space: " <<   drive.freeSpace[0] << " Gb" << "\n";
+    cout << "Drive file system: " <<   drive.fileSystem[0] << "\n";
     cout << "-----------------------------------------------\n";
 
     return 0;
