@@ -7,11 +7,15 @@
 #include <gpu.h>
 #include <disk.h>
 #include <os.h>
-using namespace hardware::WMI;
+#include <ram.h>
+#include <base_board.h>
+
+using namespace hardware;
+using namespace WMI;
 
 int main(void)
 {
-    hardware::CPU check;
+    CPU check;
     cout << "------------------- CPU -----------------------\n";
     cout << "CPU model: " << check.model << "\n";
     cout << "CPU vendor: " << check.vendor << "\n";
@@ -22,7 +26,7 @@ int main(void)
     cout << "CPU cacheSize: " << check.cacheSize << "\n";
     cout << "-----------------------------------------------\n\n";
 
-    hardware::GPU gpu;
+    GPU gpu;
     cout << "------------------- GPU -----------------------\n";
     cout << "GPU model: " << gpu.model[0] << "\n";
     cout << "GPU vendor: " << gpu.vendor[0] << "\n";
@@ -31,23 +35,41 @@ int main(void)
     cout << "GPU driverVersion: " << gpu.driverVersion[0] << "\n";
     cout << "-----------------------------------------------\n\n";
 
-    hardware::OS os;
+    OS os;
     cout << "------------------- OS -----------------------\n";
     cout << "OS os: " << os.getName() << "\n";
     cout << "OS architecture: " << os.architecture << "\n";
     cout << "OS serial number: " << os.serialN << "\n";
     cout << "-----------------------------------------------\n\n";
 
-    hardware::Drives drive;
+    Drives drive;
     cout << "------------------ DRIVES ---------------------\n";
-    cout << "Drive name: " << "\"" << drive.name[0] << "\"" << "\n";
+    cout << "Drive name: "
+         << "\"" << drive.name[0] << "\""
+         << "\n";
     cout << "Drive model: " << drive.model[0] << "\n";
     cout << "Drive vendor: " << drive.vendor[0] << "\n";
     cout << "Drive serial number: " << drive.serialN[0] << "\n";
-    cout << "Drive size: " <<   drive.size[0] << " Gb" << "\n";
-    cout << "Drive free space: " <<   drive.freeSpace[0] << " Gb" << "\n";
-    cout << "Drive file system: " <<   drive.fileSystem[0] << "\n";
-    cout << "-----------------------------------------------\n";
+    cout << "Drive size: " << drive.size[0] << " Gb"
+         << "\n";
+    cout << "Drive free space: " << drive.freeSpace[0] << " Gb"
+         << "\n";
+    cout << "Drive file system: " << drive.fileSystem[0] << "\n";
+    cout << "-----------------------------------------------\n\n";
 
+    RAM ram;
+    cout << "-------------------- RAM ----------------------\n";
+    cout << "speed: " << ram.speed << "\n";
+    cout << "serialN: " << ram.serialN << "\n";
+    cout << "-----------------------------------------------\n\n";
+
+    BaseBoard baseBoard;
+    cout << "------------------ Base Board -----------------\n";
+    cout << "name: " << baseBoard.name << "\n";
+    cout << "vendor: " << baseBoard.vendor << "\n";
+    cout << "version: " << baseBoard.version << "\n";
+    cout << "serialN: " << baseBoard.serialN << "\n";
+    cout << "-----------------------------------------------\n\n";
+    
     return 0;
 }
