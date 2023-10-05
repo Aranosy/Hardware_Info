@@ -32,7 +32,6 @@ namespace hardware
 
             // Set general COM security levels --------------------------
 
-
             hres = CoInitializeSecurity(
                 NULL,
                 -1,                          // COM authentication
@@ -72,7 +71,6 @@ namespace hardware
                 return 1; // Program has failed.
             }
 
-
             // Connect to WMI through the IWbemLocator::ConnectServer method
 
             // IWbemServices *pSvc = NULL;
@@ -99,7 +97,6 @@ namespace hardware
                 CoUninitialize();
                 return 1; // Program has failed.
             }
-
 
             // Set security levels on the proxy -------------------------
 
@@ -170,7 +167,6 @@ namespace hardware
             IWbemClassObject *pclsObj;
             ULONG uReturn = 0;
 
-
             while (pEnumerator)
             {
                 hres = pEnumerator->Next(WBEM_INFINITE, 1,
@@ -203,6 +199,157 @@ namespace hardware
                 pclsObj = NULL;
             }
             wmi_close();
+        }
+
+        // get Drives, logical Drives and Driveletters
+        vector<string> wmi_getDriveLetters()
+        {
+            // Use the IWbemServices pointer to make requests of WMI.
+            // Make requests here:
+            HRESULT hres = NULL;
+            wmi_run(hres);
+            IEnumWbemClassObject *pEnumerator = NULL;
+            vector<const wchar_t *> var{}; 
+            vector<string> ret;
+            // get localdrives
+            hres = pSvc->ExecQuery(
+                bstr_t("WQL"),
+                bstr_t("SELECT * FROM Win32_DiskDrive"),
+                WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+                NULL,
+                &pEnumerator);
+
+            if (FAILED(hres))
+            {
+                cout << "Query for processes failed. "
+                     << "Error code = 0x"
+                     << hex << hres << endl;
+                pSvc->Release();
+                pLoc->Release();
+                CoUninitialize();
+                return ret; // Program has failed.
+            }
+            else
+            {
+
+                IWbemClassObject *pclsObj;
+                ULONG uReturn = 0;
+                while (pEnumerator)
+                {
+                    hres = pEnumerator->Next(WBEM_INFINITE, 1,
+                                             &pclsObj, &uReturn);
+                    if (0 == uReturn)
+                        break;
+
+                    VARIANT vtProp;
+                    hres = pclsObj->Get(_bstr_t(L"DeviceID"), 0, &vtProp, 0, 0);
+
+                    // adjust string
+                    wstring tmp = vtProp.bstrVal;
+                    tmp = tmp.substr(4);
+
+                    wstring wstrQuery = L"Associators of {Win32_DiskDrive.DeviceID='\\\\.\\";
+                    wstrQuery += tmp;
+                    wstrQuery += L"'} where AssocClass=Win32_DiskDriveToDiskPartition SELECT Win32_DiskDrive";
+
+                    // reference drive to partition
+                    IEnumWbemClassObject *pEnumerator1 = NULL;
+                    hres = pSvc->ExecQuery(
+                        bstr_t("WQL"),
+                        bstr_t(wstrQuery.c_str()),
+                        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+                        NULL,
+                        &pEnumerator1);
+
+                    if (FAILED(hres))
+                    {
+                        cout << "Query for processes failed. "
+                             << "Error code = 0x"
+                             << hex << hres << endl;
+                        pSvc->Release();
+                        pLoc->Release();
+                        CoUninitialize();
+                        return ret; // Program has failed.
+                    }
+                    else
+                    {
+
+                        IWbemClassObject *pclsObj1;
+                        ULONG uReturn1 = 0;
+                        while (pEnumerator1)
+                        {
+                            hres = pEnumerator1->Next(WBEM_INFINITE, 1,
+                                                      &pclsObj1, &uReturn1);
+                            if (0 == uReturn1)
+                                break;
+
+                            // reference logical drive to partition
+                            VARIANT vtProp1;
+                            hres = pclsObj1->Get(_bstr_t(L"DeviceID"), 0, &vtProp1, 0, 0);
+                            wstring wstrQuery = L"Associators of {Win32_DiskPartition.DeviceID='";
+                            wstrQuery += vtProp1.bstrVal;
+                            wstrQuery += L"'} where AssocClass=Win32_LogicalDiskToPartition";
+
+                            IEnumWbemClassObject *pEnumerator2 = NULL;
+                            hres = pSvc->ExecQuery(
+                                bstr_t("WQL"),
+                                bstr_t(wstrQuery.c_str()),
+                                WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+                                NULL,
+                                &pEnumerator2);
+
+                            if (FAILED(hres))
+                            {
+                                cout << "Query for processes failed. "
+                                     << "Error code = 0x"
+                                     << hex << hres << endl;
+                                pSvc->Release();
+                                pLoc->Release();
+                                CoUninitialize();
+                                return ret; // Program has failed.
+                            }
+                            else
+                            {
+
+                                // get driveletter
+                                IWbemClassObject *pclsObj2;
+                                ULONG uReturn2 = 0;
+                                while (pEnumerator2)
+                                {
+                                    hres = pEnumerator2->Next(WBEM_INFINITE, 1,
+                                                              &pclsObj2, &uReturn2);
+                                    if (0 == uReturn2)
+                                        break;
+
+                                    VARIANT vtProp2;
+                                    hres = pclsObj2->Get(_bstr_t(L"DeviceID"), 0, &vtProp2, 0, 0);
+
+                                    //printf("%ls : %ls\n", vtProp.bstrVal, vtProp2.bstrVal);
+
+                                    wstring tmp1(vtProp1.bstrVal);
+                                    wstring tmp2(vtProp2.bstrVal);
+                                    wstring tmp = tmp1;
+                                    tmp += ';';
+                                    tmp += tmp2;
+                                    string pushBack (tmp.begin(), tmp.end());
+                                    ret.emplace_back(pushBack);
+
+                                    VariantClear(&vtProp2);
+                                }
+                                pclsObj1->Release();
+                            }
+                            VariantClear(&vtProp1);
+                            pEnumerator2->Release();
+                        }
+                        pclsObj->Release();
+                    }
+                    VariantClear(&vtProp);
+                    pEnumerator1->Release();
+                }
+            }
+            pEnumerator->Release();
+            wmi_close();
+            return ret;
         }
 
         template <typename T>
