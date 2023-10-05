@@ -232,13 +232,16 @@ namespace hardware
                 return ret[0];
             else
                 return ret;
-
         }
-
-        
-
     }
-
+    
+    vector<long long> GetSize(string table, string field)
+    {
+        vector<long long> ret;
+        for (auto i: WMI::GetWin32<vector<string>>(table, field))
+            ret.push_back(strtoll(i.c_str(), NULL, 10) / 1000000000);
+        return ret;
+    }
 
 
     }

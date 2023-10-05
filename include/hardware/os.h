@@ -8,11 +8,11 @@ namespace hardware
     
     public:
 
-    string architecture = WMI::GetWin32_s("Win32_OperatingSystem", "OSArchitecture");
-    int64_t language = WMI::GetWin32_d("Win32_OperatingSystem", "OSLanguage");
+    string architecture = WMI::GetWin32<string>("Win32_OperatingSystem", "OSArchitecture");
+    string serialN = WMI::GetWin32<string>("Win32_OperatingSystem", "SerialNumber");
     string getName()
     {
-        string fullName = WMI::GetWin32_s("Win32_OperatingSystem", "Name");
+        string fullName = WMI::GetWin32<string>("Win32_OperatingSystem", "Name");
         string ret;
         for(int i = 0; i < fullName.length(); i++)
         {
@@ -23,7 +23,7 @@ namespace hardware
             }
         }
 
-        return ret + " (" + "build " + WMI::GetWin32_s("Win32_OperatingSystem", "BuildNumber") + ")";
+        return ret + " (" + "build " + WMI::GetWin32<string>("Win32_OperatingSystem", "BuildNumber") + ")";
     }       
 
     };
