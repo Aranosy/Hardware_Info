@@ -250,7 +250,7 @@ namespace hardware
 
                     wstring wstrQuery = L"Associators of {Win32_DiskDrive.DeviceID='\\\\.\\";
                     wstrQuery += tmp;
-                    wstrQuery += L"'} where AssocClass=Win32_DiskDriveToDiskPartition SELECT Win32_DiskDrive";
+                    wstrQuery += L"'} where AssocClass=Win32_DiskDriveToDiskPartition";
 
                     // reference drive to partition
                     IEnumWbemClassObject *pEnumerator1 = NULL;
