@@ -17,7 +17,7 @@ namespace hardware
         IWbemLocator *pLoc = NULL;
         IWbemServices *pSvc = NULL;
 
-        BOOL wmi_run(HRESULT hres)
+        BOOL wmi_run(HRESULT hres, const string &server = "root/cimv2")
         {
 
             // Initialize COM. ------------------------------------------
@@ -79,7 +79,7 @@ namespace hardware
             // the current user and obtain pointer pSvc
             // to make IWbemServices calls.
             hres = pLoc->ConnectServer(
-                _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+                _bstr_t(server.c_str()), // Object path of WMI namespace
                 NULL,                    // User name. NULL = current user
                 NULL,                    // User password. NULL = current
                 0,                       // Locale. NULL indicates current
@@ -140,7 +140,7 @@ namespace hardware
                      const string &server = "root/cimv2")
         {
             HRESULT hres = NULL;
-            wmi_run(hres);
+            wmi_run(hres, server);
 
             // Use the IWbemServices pointer to make requests of WMI.
             // Make requests here:
@@ -353,14 +353,14 @@ namespace hardware
         }
 
         template <typename T>
-        T GetWin32(const string &table, string field)
+        T GetWin32(const string &table, string field, const string &server = "root/cimv2")
         {
 
             if constexpr (is_same<T, string>::value || is_same<T, vector<string>>::value)
             {
                 std::vector<const wchar_t *> var{};
                 std::vector<std::string> ret;
-                WMIExec(table, field, var);
+                WMIExec(table, field, var, server);
                 ret.reserve(var.size());
                 for (auto &v : var)
                 {
@@ -378,25 +378,19 @@ namespace hardware
             else if constexpr (is_same<T, int64_t>::value || is_same<T, vector<int64_t>>::value)
             {
                 std::vector<int64_t> var{};
-                WMIExec(table, field, var);
+                WMIExec(table, field, var, server);
                 std::vector<int64_t> ret;
                 ret.reserve(var.size());
                 for (auto &v : var)
                     ret.push_back(v);
 
-                if constexpr (is_same<T, int64_t>::value)
+                if (ret.empty())
+                    throw std::invalid_argument( "Empty vector");
+                else if constexpr (is_same<T, int64_t>::value)
                     return ret[0];
                 else
                     return ret;
             }
-        }
-
-        vector<long long> GetSize(string table, string field)
-        {
-            vector<long long> ret;
-            for (auto i : WMI::GetWin32<vector<string>>(table, field))
-                ret.push_back(strtoll(i.c_str(), NULL, 10) / 1000000000);
-            return ret;
         }
 
     }
