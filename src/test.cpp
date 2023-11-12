@@ -42,19 +42,18 @@ int main(void)
     cout << "OS serial number: " << os.serialN << "\n";
     cout << "-----------------------------------------------\n\n";
 
-    Drives drive;
+    Drives disks;
     cout << "------------------ DRIVES ---------------------\n";
-    cout << "Drive name: "
-         << "\"" << drive.name[0] << "\""
-         << "\n";
-    cout << "Drive model: " << drive.model[0] << "\n";
-    cout << "Drive vendor: " << drive.vendor[0] << "\n";
-    cout << "Drive serial number: " << drive.serialN[0] << "\n";
-    cout << "Drive size: " << drive.size[0] << " Gb"
-         << "\n";
-    cout << "Drive free space: " << drive.freeSpace[0] << " Gb"
-         << "\n";
-    cout << "Drive file system: " << drive.fileSystem[0] << "\n";
+    cout << disks.disks[0].model << "\n";
+    cout << disks.disks[0].busType << "\n";
+    cout << disks.disks[0].deviceID << "\n";
+    cout << disks.disks[0].mediaType << "\n";
+    cout << disks.disks[0].serialN << "\n";
+    cout << disks.disks[0].size << "GB" << "\n";
+    cout << "\nPartion\n";
+    cout << disks.disks[0].partions[0].totalSpace << "\n";
+    cout << disks.disks[0].partions[0].freeSpace << "\n";
+
     cout << "-----------------------------------------------\n\n";
 
     RAM ram;
@@ -71,5 +70,11 @@ int main(void)
     cout << "serialN: " << baseBoard.serialN << "\n";
     cout << "-----------------------------------------------\n\n";
     
+
+     cout << "---------------- GPT ANSWER -------------------\n";
+     cout << WMI::GetWin32<string>("Win32_DiskDrive", "DeviceID") << "\n\n";
+
+    cout << "Press Enter to end...\n";
+    cin.ignore();
     return 0;
 }
