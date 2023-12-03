@@ -1,139 +1,196 @@
 #pragma once
 
 #include "../hardware/hardware.h"
-
+#include "menus.h"
+#include <typeinfo>
 using namespace hardware;
+
+vector<string> commands{"base_board", "cpu", "disk", "gpu", "os", "ram"};
+short page = 2;
+string input = "";
 
 namespace Console
 {
-    vector<string> commands{"base_board", "cpu", "disk", "gpu", "os", "ram"};
 
-    string input = "";
+    void GotoXY(int x, int y)
+    {
+        COORD pos = {x, y};
+        HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleCursorPosition(output, pos);
+    }
 
     void HandleInput();
 
-    void DisplayBB()
+    void OutputConst()
     {
-        BaseBoard baseBoard;
-        cout << "Model: " << baseBoard.name << "\n";
-        cout << "Manufacturer: " << baseBoard.vendor << "\n";
-        cout << "Driver version: " << baseBoard.version << "\n";
-        cout << "Serial number: " << baseBoard.serialN << "\n";
-        HandleInput();
-    }
+        // Output program name
+        cout << "\xC9";
+        for (int i = 0; i < 112; i++)
+            cout << "\xCD";
+        cout << "\xBB\n";
+        cout << "\xBA";
+        for (int i = 0; i < 85; i++)
+            if (i == 45)
+                cout << "Hardware info";
+            else
+                cout << " ";
+        cout << "Version 2.0.0.0"
+             << "\xBA\n";
 
-    void DisplayCPU()
-    {
-        CPU check;
-        cout << "Model: " << check.model << "\n";
-        cout << "Manufacturer: " << check.vendor << "\n";
-        cout << "Physical cores: " << check.nPhysicalCores << "\n";
-        cout << "Logical cores: " << check.nLogicalCores << "\n";
-        cout << "Current clock speed: " << check.currentClockSpeed << "\n";
-        cout << "Max clock speed: " << check.maxClockSpeed << "\n";
-        cout << "Cache size: " << check.cacheSize << "\n";
-        HandleInput();
-    }
+        cout << "\xC8";
+        for (int i = 0; i < 112; i++)
+            cout << "\xCD";
+        cout << "\xBC\n";
 
-    void DisplayDisk()
-    {
-        Drives disks;
-        for (auto i : disks.disks)
+        // Open big table
+        cout << "\xC9";
+        for (int i = 0; i < 112; i++)
+            cout << "\xCD";
+        cout << "\xBB\n";
+
+        cout << "\xBA";
+        cout << "\xC9";
+        for (int i = 0; i < 20; i++)
+            cout << "\xCD";
+        cout << "\xBB";
+
+        cout << "\xC9";
+        for (int i = 0; i < 88; i++)
+            cout << "\xCD";
+        cout << "\xBB";
+        cout << "\xBA\n";
+
+        // Output middle of table
+        for (int line = 0; line < 12; line++)
         {
-            cout << "Drive: " << i.deviceID << "\n";
-            cout << "Bus type: " << i.busType << "\n";
-            cout << "Model: " <<i.model << "\n";
-            cout << "Media type: " <<i.mediaType << "\n";
-            cout << "Serial number: " <<i.serialN << "\n";
-            cout << "Size: " <<i.size << "GB"
-                 << "\n";
-            for (auto p : i.partions)
-            {
-                cout << "Partion: \"" << p.volume << "\"\n";
-                cout << "Total space: " << p.totalSpace << "\n";
-                cout << "Free space: " << p.freeSpace << "\n";
-                cout << "File system: " << p.fileSystem << "\n";
-            }
+            cout << "\xBA";
+            cout << "\xBA";
+
+            for (int i = 0; i < 20; i++)
+                cout << " ";
+
+            cout << "\xBA";
+            cout << "\xBA";
+
+            for (int i = 0; i < 88; i++)
+                cout << " ";
+
+            cout << "\xBA";
+            cout << "\xBA\n";
         }
-        HandleInput();
+
+        // Close big table
+        cout << "\xBA";
+        cout << "\xC8";
+        for (int i = 0; i < 20; i++)
+            cout << "\xCD";
+        cout << "\xBC";
+
+        cout << "\xC8";
+        for (int i = 0; i < 88; i++)
+            cout << "\xCD";
+        cout << "\xBC";
+        cout << "\xBA\n";
+
+        cout << "\xC8";
+        for (int i = 0; i < 112; i++)
+            cout << "\xCD";
+        cout << "\xBC\n";
+
+        // Output input table
+        cout << "\xC9";
+        for (int i = 0; i < 112; i++)
+            cout << "\xCD";
+        cout << "\xBB\n";
+
+        cout << "\xBA";
+        cout << " >";
+        for (int i = 0; i < 110; i++)
+            cout << " ";
+        cout << "\xBA\n";
+
+        cout << "\xC8";
+        for (int i = 0; i < 112; i++)
+            cout << "\xCD";
+        cout << "\xBC\n";
     }
 
-    void DisplayGPU()
+    void OutputMenu(vector<linkMenu> m, vector<string> info, string name)
     {
-        GPU gpu;
-        for (size_t i = 0; i < gpu.model.size(); i++)
+        short mPoint = (m.size() <= 7) ? 0 : +((page - 1) * 7);
+        short iPoint = (info.size() <= 7) ? 1 : 1 + ((page - 1) * 7);
+        short line = 0;
+        // Menu and info names
+        GotoXY((20 - name.length()) / 2 + 2, 6);
+        cout << name;
+        GotoXY((88 - info[0].size()) / 2 + 24, 6);
+        cout << info[0];
+
+        while (mPoint < m.size() && mPoint < page * 7)
         {
-            cout << "Model: " << gpu.model[i] << "\n";
-            cout << "Mendor: " << gpu.vendor[i] << "\n";
-            cout << "Memory amount: " << gpu.memoryAmount[i] << "\n";
-            cout << "Driver version: " << gpu.driverVersion[i] << "\n";
+            GotoXY(3, line + 8);
+            cout << mPoint + 1 << " " << m[mPoint].point;
+            mPoint++;
+            line++;
         }
-        HandleInput();
-    }
 
-    void DisplayOS()
-    {
-        OS os;
-        cout << "Operating Sytem: " << os.os << "\n";
-        cout << "Name: " << os.name << "\n";
-        cout << "Architecture: " << os.architecture << "\n";
-        cout << "Serial number: " << os.serialN << "\n";
-        HandleInput();
-    }
+        line = 0;
 
-    void DisplayRAM()
-    {   
-        RAM ram;
-        cout << "Serial number: " << ram.serialN << "\n";
-        cout << "Model: " << ram.model << "\n";
-        cout << "Size: " << ram.size << "\n";
-        cout << "Manufacturer: " << ram.vendor << "\n";
-        cout << "Speed: " << ram.speed << "\n";
-        HandleInput();
-    }
-
-    void HandleInput()
-    {
-        cout << ">";
-        getline(cin, input);
-
-        int cmd = 0;
-        for (int i = 0; i < commands.size(); i++)
-            if (input == commands[i])
-            {
-                cmd = i + 1;
-                break;
-            }
-        switch (cmd)
+        while (iPoint < info.size() && iPoint <= page * 7)
         {
-        case 1:
-            DisplayBB();
-            break;
-        case 2:
-            DisplayCPU();
-            break;
-        case 3:
-            DisplayDisk();
-            break;
-        case 4:
-            DisplayGPU();
-            break;
-        case 5:
-            DisplayOS();
-            break;
-        case 6:
-            DisplayRAM();
-            break;
-        default:
-            cout << "Error!\n";
-            HandleInput();
+            GotoXY(24, line + 8);
+            cout << " " << info[iPoint];
+            iPoint++;
+            line++;
         }
+        GotoXY(4, 20);
     }
 
-    void Create()
+
+    // void OutputLinkMenu(linkMenu m, vector<string> info, string name, bool check = false)
+    // {
+    //     if (check)
+    //     {
+    //         vector<vector<outMenu>> nextVM = m.next_menus;
+    //         short mPoint = (nextVM[0].size() <= 7) ? 0 : +((page - 1) * 7);
+    //     }
+    //     else
+    //     {
+    //         vector<outMenu> nextM = m.next_menus;
+    //         short mPoint = (nextM.size() <= 7) ? 0 : +((page - 1) * 7);
+    //     }
+    //     short iPoint = (info.size() <= 7) ? 1 : 1 + ((page - 1) * 7);
+    //     short line = 0;
+    //     // Menu and info names
+    //     GotoXY((20 - name.length()) / 2 + 2, 6);
+    //     cout << name;
+    //     GotoXY((88 - info[0].size()) / 2 + 24, 6);
+    //     cout << info[0];
+
+    //     while (mPoint < m.size() && mPoint < page * 7)
+    //     {
+    //         GotoXY(3, line + 8);
+    //         cout << mPoint + 1 << " " << m[mPoint].point;
+    //         mPoint++;
+    //         line++;
+    //     }
+
+    //     line = 0;
+
+    //     while (iPoint < info.size() && iPoint <= page * 7)
+    //     {
+    //         GotoXY(24, line + 8);
+    //         cout << " " << info[iPoint];
+    //         iPoint++;
+    //         line++;
+    //     }
+    //     GotoXY(4, 20);
+    // }
+
+    void Start()
     {
-        cout << "Hello! Version 1.0.0.0!\n";
-        HandleInput();
+        OutputConst();
+        OutputMenu(start_links, start_info, "MENU");
     }
 
 };
