@@ -66,6 +66,8 @@ vector<outMenu> cpuInfo = {
     SetOutMenu("MAX CLOCK SPEED", "Maximal clock speed: " + to_string(cpu.maxClockSpeed) + "MHz"),
     SetOutMenu("CHACHE SIZE", "Chache size: " + to_string(cpu.cacheSize) + "BYTES")};
 
+vector<vector<outMenu>> diskV = {};
+
 vector<vector<outMenu>> diskInfo;
 vector<vector<outMenu>> gpuInfo;
 
@@ -85,12 +87,12 @@ vector<outMenu> ramInfo = {
     SetOutMenu("SERIAL NUMBER", "Serial Number" + ram.serialN)};
 
 linkMenu helpM = SetLinkMenu("HELP", temp);
-linkMenu baseBoardM = SetLinkMenu("BASE BOARD", temp);
-linkMenu cpuM = SetLinkMenu("CPU", temp);
+linkMenu baseBoardM = SetLinkMenu("BASE BOARD", bbInfo);
+linkMenu cpuM = SetLinkMenu("CPU", cpuInfo);
 linkMenu diskM = SetLinkMenu("DISK", {}, tempO);
 linkMenu gpuM = SetLinkMenu("GPU", {}, tempO);
-linkMenu osM = SetLinkMenu("OS", temp);
-linkMenu ramM = SetLinkMenu("RAM", temp);
+linkMenu osM = SetLinkMenu("OS", osInfo);
+linkMenu ramM = SetLinkMenu("RAM", ramInfo);
 linkMenu allM = SetLinkMenu("OUTPUT ALL", temp);
 linkMenu logM = SetLinkMenu("SAVE LOG", temp);
 linkMenu exitM = SetLinkMenu("EXIT", temp);
