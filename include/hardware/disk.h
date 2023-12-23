@@ -25,11 +25,11 @@ namespace hardware
 
             string model;
             string serialN;
-            vector<Partions> partions;
             int64_t size;
             string busType;
             string mediaType;
             string deviceID;
+            vector<Partions> partions;
         };
         vector<Disk> disks = getInfo();
 

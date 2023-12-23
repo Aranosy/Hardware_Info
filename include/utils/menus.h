@@ -5,37 +5,17 @@
 using namespace std;
 using namespace hardware;
 
-
-struct outMenu
-{
-    string point;
-    string info;
-};
-
-outMenu SetOutMenu(string p, string i)
-{
-    outMenu ret;
-    ret.info = i;
-    ret.point = p;
-
-    return ret;
-}
-
 struct linkMenu
 {
     string point;
-    vector<outMenu> next_menus;
-    vector<vector<outMenu>> next_menusV;
+    vector<string> info;
 };
 
-linkMenu SetLinkMenu(string p, vector<outMenu> n = {}, vector<vector<outMenu>> nV = {})
+linkMenu SetLinkMenu(string p, vector<string> nm)
 {
     linkMenu ret;
-    ret.point = p;  
-    if (n.empty())
-        ret.next_menusV = nV;
-    else
-        ret.next_menus = n;
+    ret.point = p;
+    ret.info = nm;
 
     return ret;
 }
@@ -46,55 +26,98 @@ vector<string> start_info{"WELCOME",
                           "Aplication outputs hardware information about your computer. You can select menu point",
                           "on the left-side by typing number of it. To get instructions how to use program, enter",
                           "1 that gets you to HELP menu."};
-vector<outMenu> temp;
-vector<vector<outMenu>> tempO;
+
 BaseBoard bb;
-vector<outMenu> bbInfo = {
-    SetOutMenu("MODEL", "Model: " + bb.name),
-    SetOutMenu("MANUFACTURER", "Manufacturer: " + bb.vendor),
-    SetOutMenu("SERIAL NUMBER", "Serial number: " + bb.serialN),
-    SetOutMenu("VERSION", "Version: " + bb.version)};
+vector<string> bbInfo = {
+    "Model: " + bb.name,
+    "Manufacturer: " + bb.vendor,
+    "Serial number: " + bb.serialN,
+    "Version: " + bb.version};
 
 CPU cpu;
-vector<outMenu> cpuInfo = {
-    SetOutMenu("MODEL", "Model: " + cpu.model),
-    SetOutMenu("MANUFACTURER", "Manufacturer: " + cpu.vendor),
-    SetOutMenu("SERIAL NUMBER", "Serial number: " + cpu.serialN),
-    SetOutMenu("PHYSICAL CORES", "Number of physical cores: " + cpu.nPhysicalCores),
-    SetOutMenu("LOGICAL CORES", "Number of logical cores: " + cpu.nLogicalCores),
-    SetOutMenu("CUR CLOCK SPEED", "Current clock speed: " + to_string(cpu.currentClockSpeed) + "MHz"),
-    SetOutMenu("MAX CLOCK SPEED", "Maximal clock speed: " + to_string(cpu.maxClockSpeed) + "MHz"),
-    SetOutMenu("CHACHE SIZE", "Chache size: " + to_string(cpu.cacheSize) + "BYTES")};
+vector<string> cpuInfo = {
+    "Model: " + cpu.model,
+    "Manufacturer: " + cpu.vendor,
+    "Number of physical cores: " + to_string(cpu.nPhysicalCores),
+    "Number of logical cores: " + to_string(cpu.nLogicalCores),
+    "Current clock speed: " + to_string(cpu.currentClockSpeed) + "MHz",
+    "Maximal clock speed: " + to_string(cpu.maxClockSpeed) + "MHz",
+    "Chache size: " + to_string(cpu.cacheSize)};
 
-vector<vector<outMenu>> diskV = {};
 
-vector<vector<outMenu>> diskInfo;
-vector<vector<outMenu>> gpuInfo;
+Drives drives;
+vector<string> SetUpDisk()
+{
+    vector<string> diskT;
+    for (int i = 0; i < drives.disks.size(); i++)
+    {
+        diskT.push_back("Device ID: " + drives.disks[i].deviceID);   
+        diskT.push_back("Model: " + drives.disks[i].model);   
+        diskT.push_back("Serial number: " + drives.disks[i].serialN);   
+        diskT.push_back("Size: " + to_string(drives.disks[i].size));   
+        diskT.push_back("Bus type: " + drives.disks[i].busType);   
+        diskT.push_back("Media type: " + drives.disks[i].mediaType);   
+        diskT.push_back("");
+
+        for (int a = 0; a < drives.disks[i].partions.size(); a++)
+        {
+            Drives::Disk::Partions p =  drives.disks[i].partions[a];
+            diskT.push_back("PARTION " + to_string(a));
+            diskT.push_back("Volume: " + p.volume);
+            diskT.push_back("Total space: " + to_string(p.totalSpace));
+            diskT.push_back("Free space: " + to_string(p.freeSpace));
+            diskT.push_back("File system: " + p.fileSystem);
+            diskT.push_back("");
+        }
+    }
+
+    return diskT;
+}
+vector<string> diskInfo = SetUpDisk();
+
+GPU gpu;
+vector<string> SetUpGPU()
+{
+    vector<string> gpuT;
+    for(int i = 0; i < gpu.driverVersion.size(); i++)
+    {
+        gpuT.push_back("Model: " + gpu.model[i]);
+        gpuT.push_back("Manufacturer: " + gpu.vendor[i]);
+        gpuT.push_back("Memory amount: " + to_string(gpu.memoryAmount[i]));
+        gpuT.push_back("Driver version: " + gpu.driverVersion[i]);
+        gpuT.push_back("Resolution: " + to_string(gpu.resolution[i]));
+    }
+    return gpuT;
+}
+vector<string> gpuInfo = SetUpGPU();
 
 OS os;
-vector<outMenu> osInfo = {
-    SetOutMenu("NAME", "Name: " + os.os),
-    SetOutMenu("ARCHITECTURE", "Architecture: " + os.architecture),
-    SetOutMenu("SERIAL NUMBER", "Serial Number: " + os.serialN),
-    SetOutMenu("DESKTOP NAME", "Desktop name" + os.name)};
+vector<string> osInfo = {
+    "Name: " + os.os,
+    "Architecture: " + os.architecture,
+    "Serial Number: " + os.serialN,
+    "Desktop name: " + os.name};
 
 RAM ram;
-vector<outMenu> ramInfo = {
-    SetOutMenu("MODEL", "Model: " + ram.model),
-    SetOutMenu("MANUFACTURER", "Manufacturer: " + ram.vendor),
-    SetOutMenu("CAPACITY", "Capacity: " + to_string(ram.size) + "GB"),
-    SetOutMenu("SPEED", "Speed: " + to_string(ram.speed) + "nanoseconds"),
-    SetOutMenu("SERIAL NUMBER", "Serial Number" + ram.serialN)};
+vector<string> ramInfo = {
+    "Model: " + ram.model, 
+    "Manufacturer: " + ram.vendor,
+    "Capacity: " + to_string(ram.size) + "GB",
+    "Speed: " + to_string(ram.speed) + " ns",
+    "Serial Number: " + ram.serialN};
+
+vector<string> temp;
 
 linkMenu helpM = SetLinkMenu("HELP", temp);
 linkMenu baseBoardM = SetLinkMenu("BASE BOARD", bbInfo);
 linkMenu cpuM = SetLinkMenu("CPU", cpuInfo);
-linkMenu diskM = SetLinkMenu("DISK", {}, tempO);
-linkMenu gpuM = SetLinkMenu("GPU", {}, tempO);
+linkMenu diskM = SetLinkMenu("DISK", diskInfo);
+linkMenu gpuM = SetLinkMenu("GPU", gpuInfo);
 linkMenu osM = SetLinkMenu("OS", osInfo);
 linkMenu ramM = SetLinkMenu("RAM", ramInfo);
 linkMenu allM = SetLinkMenu("OUTPUT ALL", temp);
 linkMenu logM = SetLinkMenu("SAVE LOG", temp);
 linkMenu exitM = SetLinkMenu("EXIT", temp);
 
-vector<linkMenu> start_links = {helpM, baseBoardM, cpuM, diskM, gpuM, osM, ramM, allM, logM, exitM};
+// vector<linkMenu> start_links = {helpM, baseBoardM, cpuM, diskM, gpuM, osM, ramM, allM, logM, exitM};
+vector<linkMenu> start_links = {baseBoardM, cpuM, diskM, gpuM, osM, ramM};

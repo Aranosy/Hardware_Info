@@ -1,5 +1,3 @@
-#pragma once
-
 #include "../hardware/hardware.h"
 #include "menus.h"
 #include <typeinfo>
@@ -12,7 +10,6 @@ short mPoint = 0;
 short curLinkM = 0;
 string input = "";
 vector<vector<string>> pages = {};
-vector<outMenu> outputO = {};
 vector<linkMenu> outputL = {};
 
 namespace Console
@@ -27,6 +24,7 @@ namespace Console
 
     void HandleInput()
     {
+        GotoXY(4, 20);
         getline(cin, input);
 
         if (input == "N" && page != nPage - 1)
@@ -132,7 +130,7 @@ namespace Console
         cout << "\xBC\n";
     }
 
-    void OutputMenu(vector<linkMenu> m, vector<string> info, string name = "MENU")
+    void OutputStartMenu(vector<linkMenu> m, vector<string> info, string name = "MENU")
     {
         nPage = 2;
         mPoint = (m.size() <= 8) ? 0 : ((page) * 8);
@@ -167,145 +165,82 @@ namespace Console
 
     void SetPages(vector<linkMenu> m)
     {
-        short line = 0;
-        mPoint = 0;
-        vector<outMenu> out = {};
-
-        for (linkMenu menu : m)
+        pages = {};
+        vector<vector<string>> pagesT;
+        vector<string> temp;
+        for (linkMenu i : m)
         {
-            for (outMenu i : menu.next_menus)
+            if (temp.size() == 10)
             {
-                out.push_back(i);
+                pagesT.push_back(temp);
+                temp = {};
+            }
+            string p = "";
+            for (int t = 0; t < (87 - i.point.size()) / 2; t++)
+                p += " ";
+            p += i.point;
+            temp.push_back(p);
+            temp.push_back("");
+
+            for (string s : i.info)
+            {
+                if (temp.size() >= 10)
+                {
+                    pagesT.push_back(temp);
+                    temp = {};
+                }
+                temp.push_back(s);
             }
         }
-
-        outputO = out;
-        out = {};
-
-        vector<short> chapters = {0};
-
-        for (int i = 0; i < m.size() - 1; i++)
+        if (temp.size() >= 10)
         {
-            chapters.push_back(chapters[i] + m[i].next_menus.size());
+            while (temp.size() < 10)
+                temp.push_back("");
+            pagesT.push_back(temp);
         }
-
-        int sum = 0;
-        for (auto i : m)
-            sum += 3 + i.next_menus.size();
-        short nPages = floor(sum / 8);
-        for (int i = 0; i < nPages; i++)
-        {
-            pages.push_back({});
-        }
-
         short enpage = 1;
-        for (int i = 0; i < pages.size(); i++)
+        for (int i = 0; i < pagesT.size(); i++)
         {
-            vector<string> strTemp = {};
-            int temp = 1;
-            strTemp.push_back(" ");
-            if (mPoint == 0)
-            {
-                string p = "";
-                for (int i = 0; i < (20 - m[curLinkM].point.length()) / 2 - 1; i++)
-                {
-                    p += " ";
-                }
-                p += m[curLinkM].point;
-                strTemp.push_back(p);
-                strTemp.push_back(" ");
-                line += 2;
-            }
-            while (mPoint < outputO.size() && line != 9)
-            {
-                if (mPoint == chapters[temp])
-                {
-                    string p = "";
-                    strTemp.push_back(" ");
-                    for (int i = 0; i < (20 - m[temp].point.length()) / 2 - 1; i++)
-                    {
-                        p += " ";
-                    }
-                    p += m[temp].point;
-                    strTemp.push_back(p);
-                    strTemp.push_back(" ");
-                    line += 2;
-                    temp++;
-                }
-
-                string point = to_string(mPoint + 1) + " " + outputO[mPoint].point;
-                strTemp.push_back(point);
-                mPoint++;
-                line++;
-            }
-            line = 0;
-            string pagesS = "Page<" + to_string(enpage) + "," + to_string(pages.size()) + ">";
+            string pagesS = "Page<" + to_string(enpage) + "," + to_string(pagesT.size()) + ">";
             string strPages = "";
-            for (int i = 0; i < 20 - pagesS.length() - 1; i++)
+            for (int i = 0; i < 87 - pagesS.length() - 1; i++)
             {
                 strPages += " ";
             }
             strPages += pagesS;
-            strTemp.push_back(strPages);
-            pages[i] = strTemp;
+            pagesT[i].push_back(strPages);
             enpage++;
         }
+
+        pages = pagesT;
+        nPage = pages.size();
     }
 
-    void OutputLinkMenu(vector<string> menu, vector<string> info)
+    void OutputMenu(vector<string> m)
     {
-        short iPoint = 1;
+        GotoXY(10, 6);
+        cout << "MENU";
+        GotoXY(3, 8);
+        cout << "1 BACK";
+
         short line = 0;
-
-        for (int i = 0; i < menu.size(); i++)
+        for (string i : m)
         {
-            if (i == menu.size() - 1)
-            {
-                GotoXY(3, 16);
-                cout << menu[i];
-            }
-            else
-            {
-                GotoXY(3, line + 5);
-                cout << menu[i];
-                line++;
-            }
-        }
-
-        line = 0;
-
-        GotoXY((88 - info[0].size()) / 2 + 24, 6);
-        cout << info[0];
-
-        while (iPoint < info.size() && iPoint <= page * 8)
-        {
-            GotoXY(24, line + 8);
-            cout << " " << info[iPoint];
-            iPoint++;
+            GotoXY(24, line + 6);
+            cout << " " << i;
             line++;
         }
-
-        GotoXY(4, 20);
     }
 
     void Start()
     {
-        OutputConst();
-        OutputMenu(start_links, start_info);
-        HandleInput();
-        OutputConst();
-        OutputMenu(start_links, start_info);
-        HandleInput();
-        SetPages({baseBoardM, cpuM});
-        OutputConst();
-        OutputLinkMenu(pages[page], start_info);
-        HandleInput();
-        OutputConst();
-        OutputLinkMenu(pages[page], start_info);
-        HandleInput();
-        OutputConst();
-        OutputLinkMenu(pages[page], start_info);
-
+        SetPages(start_links);
+        while (true)
+        {
+            HandleInput();
+            OutputConst();
+            OutputMenu(pages[page]);
+        }
         cin.ignore();
     }
 
