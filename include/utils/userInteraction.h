@@ -1,4 +1,5 @@
 #include "menus.h"
+#include <fstream>
 #include <typeinfo>
 using namespace hardware;
 
@@ -9,6 +10,7 @@ vector<vector<string>> pages = {};
 vector<linkMenu> output = {};
 vector<linkMenu> outputO = {};
 vector<string> par = {"PATH", "HELP", "NEXT", "PAST"};
+bool isSaved = false;
 int inputLength = 4;
 
 namespace Console
@@ -313,6 +315,30 @@ namespace Console
         }
     }
 
+    void SaveLog(string path = "")
+    {
+        string p;
+        if (path != "")
+            p += path + "\\log.txt";
+        else
+            p = "log.txt";
+        
+        ofstream log_file(p);
+
+        if (!log_file)
+            OutError("Can't save file by specified PATH");
+        for (vector<string> p: pages)
+            for (int i = 0;i < p.size() - 1; i++)
+                log_file << p[i] << endl;
+        isSaved = true;
+        nPage = 1;
+        if (path == "")
+             pages = {{"Created file named log.txt in program directory."}};
+        else
+            pages = {{"Created file by path " + path + ""}};
+
+    }
+
     void HandleInput()
     {
         string input = "";
@@ -338,10 +364,20 @@ namespace Console
 
         vector<string> sep = split(input, ' ');
         if (inMenu == true && sep.size() > 1)
-            OutError("Wrong input, write Help to get instructions");
+            if (sep[0] == "2")
+            {
+                sep = split(input, '"');
+                if (sep.empty())
+                    OutError("Can't save file by specified PATH");
+
+            }
+            else
+                OutError("Wrong input, write Help to get instructions");
+
+        
 
         for (string i : sep)
-            if (i.length() >= 5 )
+            if (i.length() >= 5 && sep[0] != "2 ")
                 OutError("Wrong input, write Help to get instructions");
 
         short bounds = (inMenu == false) ? 10 : 3;
@@ -396,7 +432,7 @@ namespace Console
                 else
                     OutError("Wrong input, write Help to get instructions");
             }
-            else if (is_number(i) && inMenu == true)
+            else if ((is_number(i) && inMenu == true) || sep[0] == "2 ")
             {
                 if (i == "1")
                 {
@@ -405,11 +441,24 @@ namespace Console
                     page = 0;
                     SetStartMenu(start_links);
                 }
-                // else ...
+                else if (sep.size() == 2 || i == "2")
+                {
+                    if (isSaved)
+                        OutError("File already saved");
+                    if (sep.size() == 2)
+                        SaveLog(sep[1]);
+                    else
+                        SaveLog();
+                    OutputConst();
+                    OutputMenu(pages[0]);
+                    HandleInput();
+                }
             }
             else
                 OutError("Wrong input, write Help to get instructions");
         }
+
+        isSaved = false;
 
         if (!outputO.empty())
         {
@@ -436,6 +485,11 @@ namespace Console
             SetPages(outputO);
             OutputConst();
             OutputMenu(pages[page]);
+        }
+        else if (isSaved)
+        {
+            OutputConst();
+            OutputMenu(pages[0]);
         }
         else
         {
