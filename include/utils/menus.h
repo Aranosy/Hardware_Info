@@ -20,6 +20,21 @@ linkMenu SetLinkMenu(string p, vector<string> nm)
     return ret;
 }
 
+struct menu
+{
+    string name;
+    vector<linkMenu> links;
+};
+
+menu SetMenu(string name, vector<linkMenu> l)
+{
+    menu ret;
+    ret.name = name;
+    ret.links = l;
+
+    return ret;
+}
+
 
 vector<string> start_info{"WELCOME",
                           "Hardware info is aplication created for Hardward CS50 2023 by Miroshnychenko Artem.",
@@ -85,7 +100,8 @@ vector<string> SetUpGPU()
         gpuT.push_back("Manufacturer: " + gpu.vendor[i]);
         gpuT.push_back("Memory amount: " + to_string(gpu.memoryAmount[i]));
         gpuT.push_back("Driver version: " + gpu.driverVersion[i]);
-        gpuT.push_back("Resolution: " + to_string(gpu.resolution[i]));
+        gpuT.push_back("Current refresh rate: " + to_string(gpu.refreshRate[i]));
+        gpuT.push_back("Resolution: " + gpu.resolution[i]);
     }
     return gpuT;
 }
@@ -120,4 +136,4 @@ linkMenu logM = SetLinkMenu("SAVE LOG", temp);
 linkMenu exitM = SetLinkMenu("EXIT", temp);
 
 // vector<linkMenu> start_links = {helpM, baseBoardM, cpuM, diskM, gpuM, osM, ramM, allM, logM, exitM};
-vector<linkMenu> start_links = {baseBoardM, cpuM, diskM, gpuM, osM, ramM};
+vector<menu> start_links = {SetMenu("HARDWARE" ,{baseBoardM, cpuM, diskM, gpuM, osM, ramM}), SetMenu("UTILS", {helpM, allM, exitM})};

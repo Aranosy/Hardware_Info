@@ -1,19 +1,20 @@
-#include "../hardware/hardware.h"
 #include "menus.h"
 #include <typeinfo>
 using namespace hardware;
 
-vector<string> commands{"base_board", "cpu", "disk", "gpu", "os", "ram"};
 short page = 0;
 short nPage = 0;
-short mPoint = 0;
-short curLinkM = 0;
-string input = "";
+bool inMenu = false;
 vector<vector<string>> pages = {};
-vector<linkMenu> outputL = {};
+vector<linkMenu> output = {};
+vector<linkMenu> outputO = {};
+vector<string> par = {"PATH", "HELP", "NEXT", "PAST"};
+int inputLength = 4;
 
 namespace Console
 {
+
+    void OutError(string s);
 
     void GotoXY(int x, int y)
     {
@@ -22,22 +23,46 @@ namespace Console
         SetConsoleCursorPosition(output, pos);
     }
 
-    void HandleInput()
+    bool is_number(const string &s)
     {
-        GotoXY(4, 20);
-        getline(cin, input);
+        std::string::const_iterator it = s.begin();
+        while (it != s.end() && std::isdigit(*it))
+            ++it;
+        return !s.empty() && it == s.end();
+    }
 
-        if (input == "N" && page != nPage - 1)
-            page++;
-        else if (page > 0 && input == "B")
+    vector<string> split(const string &s, char sep)
+    {
+        vector<string> ret;
+        string temp = s;
+        short i = 0;
+        temp += " ";
+        while (i < temp.size())
         {
-            page--;
-            mPoint -= 8;
+            if (temp[i] == sep && temp[i + 1] != sep)
+            {
+                ret.push_back(temp.substr(0, i));
+                temp.erase(0, i + 1);
+                i = 0;
+            }
+            else
+                i++;
         }
+        return ret;
+    }
+
+    string toupper_str(const string &s)
+    {
+        string ret;
+        for (char i : s)
+            ret += toupper(i);
+
+        return ret;
     }
 
     void OutputConst()
     {
+        GotoXY(0, 0);
         // Output program name
         cout << "\xC9";
         for (int i = 0; i < 112; i++)
@@ -49,7 +74,7 @@ namespace Console
                 cout << "Hardware info";
             else
                 cout << " ";
-        cout << "Version 2.0.0.0"
+        cout << "Version 1.0.0.0"
              << "\xBA\n";
 
         cout << "\xC8";
@@ -130,30 +155,83 @@ namespace Console
         cout << "\xBC\n";
     }
 
-    void OutputStartMenu(vector<linkMenu> m, vector<string> info, string name = "MENU")
+    void SetStartMenu(vector<menu> m)
     {
-        nPage = 2;
-        mPoint = (m.size() <= 8) ? 0 : ((page) * 8);
-        short iPoint = (info.size() <= 8) ? 1 : 1 + ((page) * 8);
-        short line = 0;
-        // Menu and info names
-        GotoXY((20 - name.length()) / 2 + 2, 6);
-        cout << name;
-        GotoXY((88 - info[0].size()) / 2 + 24, 6);
-        cout << info[0];
-
-        while (mPoint < m.size() && mPoint < (page + 1) * 8)
+        vector<vector<string>> r = {};
+        vector<string> ret = {};
+        short en = 1;
+        for (auto i : m)
         {
-            GotoXY(3, line + 8);
-            cout << mPoint + 1 << " " << m[mPoint].point;
-            outputL.push_back(m[mPoint]);
-            mPoint++;
+            if (ret.size() < 9)
+            {
+                ret.push_back(" ");
+                string n = "";
+                for (int s = 0; s < (20 - i.name.length()) / 2; s++)
+                    n += " ";
+                ret.push_back(n + i.name);
+                ret.push_back(" ");
+            }
+            else
+            {
+                r.push_back(ret);
+                ret = {};
+                ret.push_back(" ");
+                string n = "";
+                for (int s = 0; s < (20 - i.name.length()) / 2; s++)
+                    n += " ";
+                ret.push_back(n + i.name);
+                ret.push_back(" ");
+            }
+            for (auto p : i.links)
+            {
+                if (ret.size() < 9)
+                {
+                    ret.push_back(" " + to_string(en) + " " + p.point);
+                    output.push_back(p);
+                    en++;
+                }
+                else
+                {
+                    r.push_back(ret);
+                    ret = {};
+                }
+            }
+        }
+
+        if (!ret.empty())
+            r.push_back(ret);
+
+        for (int i = 0; i < r.size(); i++)
+        {
+            while (r[i].size() < 11)
+                r[i].push_back(" ");
+            string strP;
+            for (int i = 0; i < 9; i++)
+                strP += " ";
+
+            r[i].push_back(strP + "Page<" + to_string(i + 1) + ",2> ");
+        }
+        pages = r;
+        nPage = 2;
+    }
+
+    void OutputStartMenu(vector<string> m, vector<string> info)
+    {
+        short line = 0;
+        short iPoint = 1;
+        // Menu and info names
+        for (auto i : m)
+        {
+            GotoXY(3, line + 5);
+            cout << i;
             line++;
         }
 
         line = 0;
+        GotoXY((88 - info[0].size()) / 2 + 24, 6);
+        cout << info[0];
 
-        while (iPoint < info.size() && iPoint <= page * 7)
+        while (iPoint < info.size() && iPoint <= page + 1 * 12)
         {
             GotoXY(24, line + 8);
             cout << " " << info[iPoint];
@@ -170,7 +248,7 @@ namespace Console
         vector<string> temp;
         for (linkMenu i : m)
         {
-            if (temp.size() == 10)
+            if (temp.size() > 8)
             {
                 pagesT.push_back(temp);
                 temp = {};
@@ -179,12 +257,13 @@ namespace Console
             for (int t = 0; t < (87 - i.point.size()) / 2; t++)
                 p += " ";
             p += i.point;
+            temp.push_back("");
             temp.push_back(p);
             temp.push_back("");
 
             for (string s : i.info)
             {
-                if (temp.size() >= 10)
+                if (temp.size() >= 11)
                 {
                     pagesT.push_back(temp);
                     temp = {};
@@ -192,9 +271,9 @@ namespace Console
                 temp.push_back(s);
             }
         }
-        if (temp.size() >= 10)
+        if (temp.size() < 11)
         {
-            while (temp.size() < 10)
+            while (temp.size() < 11)
                 temp.push_back("");
             pagesT.push_back(temp);
         }
@@ -222,25 +301,161 @@ namespace Console
         cout << "MENU";
         GotoXY(3, 8);
         cout << "1 BACK";
+        GotoXY(3, 9);
+        cout << "2 SAVE TO LOG";
 
         short line = 0;
         for (string i : m)
         {
-            GotoXY(24, line + 6);
+            GotoXY(24, line + 5);
             cout << " " << i;
             line++;
         }
     }
 
-    void Start()
+    void HandleInput()
     {
-        SetPages(start_links);
-        while (true)
+        string input = "";
+        GotoXY(inputLength, 20);
+        getline(cin, input);
+        inputLength = 4;
+
+        if (input.length() == 0)
         {
+            if (inMenu)
+            {
+                SetPages(outputO);
+                OutputConst();
+                OutputMenu(pages[page]);
+            }
+            else
+            {
+                OutputConst();
+                OutputStartMenu(pages[page], start_info);
+            }
             HandleInput();
+        }
+
+        vector<string> sep = split(input, ' ');
+        if (inMenu == true && sep.size() > 1)
+            OutError("Wrong input, write Help to get instructions");
+
+        for (string i : sep)
+            if (i.length() >= 5 )
+                OutError("Wrong input, write Help to get instructions");
+
+        short bounds = (inMenu == false) ? 10 : 3;
+        short inB = 0;
+        for (string i : sep)
+            if (is_number(i))
+            {
+                int n = stoi(i);
+                if (n < bounds && n > 0)
+                    inB++;
+            }
+
+        if (inB == sep.size())
+            outputO = {};
+
+        for (string i : sep)
+        {
+            if (toupper_str(i) == "HELP")
+            {
+                outputO = {output[6]};
+                break;
+            }
+            else if (toupper_str(i) == "NEXT")
+            {
+                if (page != nPage - 1)
+                    page++;
+                break;
+            }
+            else if (toupper_str(i) == "PAST")
+            {
+                if (page > 0)
+                    page--;
+                break;
+            }
+            else if (is_number(i) && inMenu == false)
+            {
+                int n = stoi(i) - 1;
+                if (n == 6)
+                {
+                    outputO = {output[n]};
+                    break;
+                }
+                else if (n == 7)
+                {
+                    outputO = start_links[0].links;
+                    break;
+                }
+                else if (n == 8)
+                    exit(0);
+                else if (n < 6 && n > -1)
+                    outputO.push_back(output[n]);
+                else
+                    OutError("Wrong input, write Help to get instructions");
+            }
+            else if (is_number(i) && inMenu == true)
+            {
+                if (i == "1")
+                {
+                    outputO = {};
+                    inMenu = false;
+                    page = 0;
+                    SetStartMenu(start_links);
+                }
+                // else ...
+            }
+            else
+                OutError("Wrong input, write Help to get instructions");
+        }
+
+        if (!outputO.empty())
+        {
+            if (inMenu == false)
+                page = 0;
+            inMenu = true;
+            SetPages(outputO);
             OutputConst();
             OutputMenu(pages[page]);
         }
+        else
+        {
+            OutputConst();
+            OutputStartMenu(pages[page], start_info);
+        }
+        // ...
+        HandleInput();
+    }
+
+    void OutError(string s)
+    {
+        if (!outputO.empty())
+        {
+            SetPages(outputO);
+            OutputConst();
+            OutputMenu(pages[page]);
+        }
+        else
+        {
+            OutputConst();
+            OutputStartMenu(pages[page], start_info);
+        }
+
+        GotoXY(2, 20);
+        s += " > ";
+        inputLength = s.size() + 2;
+        cout << s;
+        HandleInput();
+    }
+
+    void Start()
+    {
+        OutputConst();
+        SetStartMenu(start_links);
+        OutputStartMenu(pages[0], start_info);
+        HandleInput();
         cin.ignore();
     }
 

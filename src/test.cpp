@@ -60,6 +60,7 @@ int WinMain(HINSTANCE hInstance,
     consolesize.srWindow.Bottom = 50;
 
     SetConsoleScreenBufferInfoEx(hConsole, &consolesize);
+    setlocale(LC_ALL, "en_US.UTF-8");
     Console::Start();
     cin.ignore();
 }
