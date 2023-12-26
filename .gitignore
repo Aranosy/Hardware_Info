@@ -3,6 +3,7 @@
 /**/versions/**
 *.pdb
 *.txt
+*.ico
 # Prerequisites
 *.d
 

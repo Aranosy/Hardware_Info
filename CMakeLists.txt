@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories(${PROJECT_SOURCE_DIR}/include/hardware)
 include_directories(${PROJECT_SOURCE_DIR}/include/utils)
 
-add_executable(test src/test.cpp)
+add_executable(Hardware_info src/app.cpp)
