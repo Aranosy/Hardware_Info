@@ -209,7 +209,7 @@ namespace hardware
             HRESULT hres = NULL;
             wmi_run(hres);
             IEnumWbemClassObject *pEnumerator = NULL;
-            vector<const wchar_t *> var{}; 
+            vector<const wchar_t *> var{};
             vector<string> ret;
             // get localdrives
             hres = pSvc->ExecQuery(
@@ -324,14 +324,14 @@ namespace hardware
                                     VARIANT vtProp2;
                                     hres = pclsObj2->Get(_bstr_t(L"DeviceID"), 0, &vtProp2, 0, 0);
 
-                                    //printf("%ls : %ls\n", vtProp.bstrVal, vtProp2.bstrVal);
+                                    // printf("%ls : %ls\n", vtProp.bstrVal, vtProp2.bstrVal);
 
                                     wstring tmp1(vtProp1.bstrVal);
                                     wstring tmp2(vtProp2.bstrVal);
                                     wstring tmp = tmp1;
                                     tmp += ';';
                                     tmp += tmp2;
-                                    string pushBack (tmp.begin(), tmp.end());
+                                    string pushBack(tmp.begin(), tmp.end());
                                     ret.emplace_back(pushBack);
 
                                     VariantClear(&vtProp2);
@@ -385,11 +385,35 @@ namespace hardware
                     ret.push_back(v);
 
                 if (ret.empty())
-                    throw std::invalid_argument( "Empty vector");
+                    throw std::invalid_argument("Empty vector");
                 else if constexpr (is_same<T, int64_t>::value)
                     return ret[0];
                 else
                     return ret;
+            }
+        }
+
+        template <typename T, typename type>
+        T GetSize(string table, string field, long diviser)
+        {
+            vector<long long> ret;
+            for (auto i : WMI::GetWin32<vector<type>>(table, field))
+                if constexpr (is_same<type, string>::value)
+                    ret.push_back(strtoll(i.c_str(), NULL, 10) / diviser);
+                else
+                    if constexpr (is_same<T, vector<int64_t>>::value)
+                        ret.push_back(round(i * 2 / diviser));
+                    else
+                        ret.push_back(round(i / diviser));
+
+            if constexpr (is_same<T, vector<int64_t>>::value)
+                return ret;
+            else if constexpr (is_same<T, int64_t>::value)
+            {
+                int64_t retn = 0;
+                for (auto i: ret)
+                    retn += i;
+                return retn;
             }
         }
 

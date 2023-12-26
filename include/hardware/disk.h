@@ -1,7 +1,9 @@
+#pragma once
+
 #include <string>
 #include <windows.h>
 #include <algorithm>
-#include "InitWMI.h"
+#include "../utils/InitWMI.h"
 
 namespace hardware
 {
@@ -23,21 +25,13 @@ namespace hardware
 
             string model;
             string serialN;
-            vector<Partions> partions;
-            long long size;
+            int64_t size;
             string busType;
             string mediaType;
             string deviceID;
+            vector<Partions> partions;
         };
         vector<Disk> disks = getInfo();
-
-        vector<long long> GetSize(string table, string field)
-        {
-            vector<long long> ret;
-            for (auto i : WMI::GetWin32<vector<string>>(table, field))
-                ret.push_back(strtoll(i.c_str(), NULL, 10) / 1000000000);
-            return ret;
-        }
 
         static bool physicDriveSort(string f, string s)
         {
@@ -112,7 +106,7 @@ namespace hardware
             vector<string> pDrives = WMI::GetWin32<vector<string>>("Win32_DiskDrive", "DeviceID");
             vector<string> models = WMI::GetWin32<vector<string>>("Win32_DiskDrive", "Model");
             vector<string> serialNs = WMI::GetWin32<vector<string>>("Win32_DiskDrive", "SerialNumber");
-            vector<long long> size = GetSize("Win32_DiskDrive", "Size");
+            vector<int64_t> size = WMI::GetSize<vector<int64_t>, string>("Win32_DiskDrive", "Size", pow(10, 9));
 
             string media[4] = {"Unspecified", "HDD", "SSD", "SCM"};
             string buses[18] = {"The bus type is unknown.", "SCSI", "ATAPI", "ATA", "IEEE 1394", "SSA", "Fibre Channel", "USB",
@@ -136,7 +130,7 @@ namespace hardware
                         break;
 
                 // Put disk drive info
-                int cdd = stoi(currentDiskDrive);
+                int cdd = stoi(currentDiskDrive);   
                 ret[stoi(currentDiskDrive)].model = models[i];
                 ret[stoi(currentDiskDrive)].serialN = serialNs[i];
                 ret[stoi(currentDiskDrive)].size = size[i];

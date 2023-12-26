@@ -2,7 +2,8 @@
 
 #include <string>
 #include <vector>
-#include "InitWMI.h"
+
+#include "../utils/InitWMI.h"
 
 namespace hardware 
 {
@@ -10,8 +11,8 @@ namespace hardware
     
     public:
 
-        std::string model = WMI::GetWin32<string>("Win32_Processor", "Name");
-        std::string vendor = WMI::GetWin32<string>("Win32_Processor", "Manufacturer");
+        string model = WMI::GetWin32<string>("Win32_Processor", "Name");
+        string vendor = WMI::GetWin32<string>("Win32_Processor", "Manufacturer");
         int64_t nPhysicalCores = WMI::GetWin32<int64_t>("Win32_Processor", "NumberOfCores");
         int64_t nLogicalCores = WMI::GetWin32<int64_t>("Win32_Processor", "NumberOfLogicalProcessors");
         int64_t currentClockSpeed = WMI::GetWin32<int64_t>("Win32_Processor", "CurrentClockSpeed");
@@ -19,4 +20,6 @@ namespace hardware
         int64_t cacheSize = WMI::GetWin32<int64_t>("Win32_Processor", "L3CacheSize") * 1024;
 
     };
+
+
 }

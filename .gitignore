@@ -1,8 +1,9 @@
 /**/.vscode/**
 /**/build/**
-
+/**/versions/**
 *.pdb
 *.txt
+*.ico
 # Prerequisites
 *.d
 
@@ -32,6 +33,5 @@
 *.lib
 
 # Executables
-*.exe
 *.out
 *.app

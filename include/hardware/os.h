@@ -1,6 +1,8 @@
+#pragma once
+
 #include <string>
 #include <windows.h>
-#include "InitWMI.h"
+#include "../utils/InitWMI.h"
 
 namespace hardware 
 {
@@ -10,6 +12,8 @@ namespace hardware
 
     string architecture = WMI::GetWin32<string>("Win32_OperatingSystem", "OSArchitecture");
     string serialN = WMI::GetWin32<string>("Win32_OperatingSystem", "SerialNumber");
+    string os = getName();
+    string name = WMI::GetWin32<string>("Win32_ComputerSystem", "Name");
     string getName()
     {
         string fullName = WMI::GetWin32<string>("Win32_OperatingSystem", "Name");
@@ -23,7 +27,7 @@ namespace hardware
             }
         }
 
-        return ret + " (" + "build " + WMI::GetWin32<string>("Win32_OperatingSystem", "BuildNumber") + ")";
+        return  ret + " (" + "build " + WMI::GetWin32<string>("Win32_OperatingSystem", "BuildNumber") + ")";
     }       
 
     };
