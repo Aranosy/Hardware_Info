@@ -1,4 +1,4 @@
-#include "C:\Users\artem\hwinfo_CS50\include\utils\userInteraction.h"
+#include <userInteraction.h>
 using namespace hardware;
 using namespace WMI;
 

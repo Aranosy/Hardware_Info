@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include <variant>
-#include "C:\Users\artem\hwinfo_CS50\include\hardware\hardware.h"
+#include <hardware.h>
 using namespace std;
 using namespace hardware;
 
