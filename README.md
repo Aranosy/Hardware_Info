@@ -83,3 +83,21 @@ Its may be: digits bigger that 9 or smaller that 0, arguments bigger that 5 leng
 
 ### Can't save file by specified PATH
 Path writen with "." or ".." like "../../FolderToSaves" or ".". Program not opened with administrator rigths and path out of user scope, like "C:\". Also usage "/" instead of "\\" may create error.
+
+## Disclaimer
+
+Please note that the code in this repository may contain mistakes or suboptimal implementations. I am still learning and would greatly appreciate any feedback or suggestions for improvement.
+
+### How to Contribute
+
+I would love to hear your thoughts and suggestions! If you find any issues or have any advice on how to improve the code, please feel free to:
+
+- Open an issue
+- Submit a pull request
+- Leave comments
+
+### Contact
+
+If you want to reach out to me directly, you can contact me on reddit: u/Aranosy1.
+
+Thank you for taking the time to review my project. Your feedback is invaluable to my learning process!
