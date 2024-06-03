@@ -82,4 +82,4 @@ Basic problem, that error outputed when user gives wrong.
 Its may be: digits bigger that 9 or smaller that 0, arguments bigger that 5 length, characters that are not in the encoding "Code Page 850" (cmd encoding) and etc.
 
 ### Can't save file by specified PATH
-Path writen with "." or ".." like "../../FolderToSaves" or ".". Program not opened with administrator rigths and path out of user scope, like "C:\". Also usage "/" instead of "\" may create error.
+Path writen with "." or ".." like "../../FolderToSaves" or ".". Program not opened with administrator rigths and path out of user scope, like "C:\". Also usage "/" instead of "\\" may create error.
