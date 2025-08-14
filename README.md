@@ -1,5 +1,4 @@
 # Hardware info
-#### Video Demo:  <URL https://youtu.be/SpXE1cokv9Y>
 
 Hardware info is project written in C++ via WMI and CMake. To query hardware info about user computer and output in simple command line interface. Here is section of programm:
 
